@@ -1,22 +1,29 @@
 package com.example.android5lab
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.module.AppGlideModule
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -25,6 +32,7 @@ import okhttp3.Request
 import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
+import java.net.URL
 import java.sql.Wrapper
 
 
@@ -35,13 +43,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Timber.plant(Timber.DebugTree())
-        var recyclerView: RecyclerView = findViewById(R.id.rView)
-        val layoutManager = GridLayoutManager(this, 2)
-        recyclerView.layoutManager = layoutManager
+        val itemList = listOf("Item 1", "Item 2", "Item 3") // Замени это на свои данные
 
-        var PhotoLinks: List<String> = listOf("1")
-        var PhotoAdapter = PhotoAdapter(this, PhotoLinks)
-        recyclerView.adapter = PhotoAdapter
+
+
+
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -63,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                     val wrapper = gson.fromJson(body, com.example.android5lab.Wrapper::class.java)
 
                     photoLinks = wrapper.photos.photo.map { photo ->
-                        "\"https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_z.jpg\""
+                        "https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_z.jpg"
                     }
                     Timber.i("Copied link: $photoLinks")
 
@@ -73,9 +79,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     runOnUiThread {
-
-                        PhotoAdapter.updateList(photoLinks)
-
+                        displayImageList(photoLinks)
                     }
                 }
             } catch (e: IOException) {
@@ -85,6 +89,12 @@ class MainActivity : AppCompatActivity() {
         }.start()
 
 
+
+    }
+    private fun displayImageList(imageUrlList: List<String>) {
+        val recyclerView: RecyclerView = findViewById(R.id.rView)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        recyclerView.adapter = MyAdapter(imageUrlList)
     }
 }
 
@@ -92,7 +102,7 @@ data class Photo(
     val id: String,
     val owner: String,
     val secret: String,
-    val server: Double,
+    val server: String,
     val farm: Int,
     val title: String,
     val isItPublic: Int,
@@ -112,46 +122,27 @@ data class Wrapper(
     val photos: PhotoPage
 )
 
-class PhotoAdapter(private val context: Context, private var photoLinks: List<String>) :
-    RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
-    inner class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.recyclerViewIV)
 
-        init {
-            itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val link = photoLinks[position]
-                    copyToClipboard(link)
-                    Timber.i("Copied link: $link")
-                }
-            }
-        }
+class MyAdapter(private val imageUrlList: List<String>) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+
+    class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val imageViewItem: ImageView = view.findViewById(R.id.recyclerViewIV)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.rview_item, parent, false)
-        return PhotoViewHolder(view)
+        return MyViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-        val PhotoUrl = photoLinks[position]
-        Glide.with(context).load(PhotoUrl).into(holder.imageView)
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        Glide.with(holder.imageViewItem)
+            .load(imageUrlList[position])
+            .centerCrop()
+            .into(holder.imageViewItem)
     }
 
     override fun getItemCount(): Int {
-        return photoLinks.size
-    }
-
-    fun updateList(links: List<String>) {
-        photoLinks = links
-        Timber.d("Links in Adapter $photoLinks")
-        notifyDataSetChanged()
-    }
-
-    private fun copyToClipboard(link: String) {
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("Photo link", link)
-        clipboard.setPrimaryClip(clip)
+        return imageUrlList.size
     }
 }
+
