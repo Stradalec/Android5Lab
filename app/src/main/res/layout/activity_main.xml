@@ -2,15 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id = "@+id/rView"
+    <!-- EditText для ввода текста -->
+    <EditText
+        android:id="@+id/et_search"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf= "parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf = "parent"
-        app:layout_constraintTop_toTopOf = "parent"/>
+        android:layout_height="50dp"
+        android:hint="Введите текст для поиска"
+        android:inputType="text" />
+
+    <!-- Button для поиска -->
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Найти"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp" />
+
+    <!-- RecyclerView для отображения списка -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>
