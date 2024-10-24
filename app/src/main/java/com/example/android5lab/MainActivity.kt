@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Timber.plant(Timber.DebugTree())
-        val itemList = listOf("Item 1", "Item 2", "Item 3") // Замени это на свои данные
 
 
 
