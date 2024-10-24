@@ -1,39 +1,23 @@
 package com.example.android5lab
 
-import android.app.Activity
+import android.R.attr.data
 import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.annotation.GlideModule
-import com.bumptech.glide.module.AppGlideModule
 import com.google.gson.FieldNamingPolicy
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
-import java.net.URL
-import java.sql.Wrapper
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,10 +27,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Timber.plant(Timber.DebugTree())
-
-
-
-
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -138,6 +118,9 @@ class MyAdapter(private val imageUrlList: List<String>) : RecyclerView.Adapter<M
             .load(imageUrlList[position])
             .centerCrop()
             .into(holder.imageViewItem)
+        holder.imageViewItem.setOnClickListener{
+            Timber.i("$imageUrlList[position]")
+        }
     }
 
     override fun getItemCount(): Int {
