@@ -2,6 +2,7 @@ package com.example.android5lab
 
 import android.R.attr.data
 import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -58,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     runOnUiThread {
-                        displayImageList(photoLinks)
+                        displayImageList(this, photoLinks)
                     }
                 }
             } catch (e: IOException) {
@@ -70,10 +71,10 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    private fun displayImageList(imageUrlList: List<String>) {
+    private fun displayImageList(inputContext: Context, imageUrlList: List<String>) {
         val recyclerView: RecyclerView = findViewById(R.id.rView)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.adapter = MyAdapter(imageUrlList)
+        recyclerView.adapter = MyAdapter(inputContext, imageUrlList)
     }
 }
 
@@ -102,7 +103,7 @@ data class Wrapper(
 )
 
 
-class MyAdapter(private val imageUrlList: List<String>) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+class MyAdapter(private val context: Context, val imageUrlList: List<String>) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageViewItem: ImageView = view.findViewById(R.id.recyclerViewIV)
@@ -119,7 +120,11 @@ class MyAdapter(private val imageUrlList: List<String>) : RecyclerView.Adapter<M
             .centerCrop()
             .into(holder.imageViewItem)
         holder.imageViewItem.setOnClickListener{
-            Timber.i("$imageUrlList[position]")
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("copied", imageUrlList[position])
+            val thisUrl = imageUrlList[position]
+            clipboard.setPrimaryClip(clip)
+            Timber.i(thisUrl)
         }
     }
 
