@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
             .url("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=ff49fcd4d4a08aa6aafb6ea3de826464&tags=cat&format=json&nojsoncallback=1")
             .build()
 
+
         Thread {
             var photoLinks: List<String> = listOf("1")
             try {
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
 
     private fun displayImageList(inputContext: Context, imageUrlList: List<String>) {
         val recyclerView: RecyclerView = findViewById(R.id.rView)
