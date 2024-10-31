@@ -83,55 +83,8 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-data class Photo(
-    val id: String,
-    val owner: String,
-    val secret: String,
-    val server: String,
-    val farm: Int,
-    val title: String,
-    val isItPublic: Int,
-    val isFriend: Int,
-    val isFamily: Int
-)
-
-data class PhotoPage(
-    val page: Int,
-    val pages: Int,
-    val perpage: Int,
-    val total: Int,
-    val photo: List<Photo>
-)
-
-data class Wrapper(
-    val photos: PhotoPage
-)
 
 
-class MyAdapter(private val imageUrlList: List<String>, private val onClick: (String) -> Unit) :
-    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
-    class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageViewItem: ImageView = view.findViewById(R.id.recyclerViewIV)
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.rview_item, parent, false)
-        return MyViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Glide.with(holder.imageViewItem)
-            .load(imageUrlList[position])
-            .centerCrop()
-            .into(holder.imageViewItem)
-        holder.imageViewItem.setOnClickListener {
-            onClick(imageUrlList[position])
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return imageUrlList.size
-    }
-}
 
