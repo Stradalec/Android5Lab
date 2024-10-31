@@ -69,12 +69,17 @@ class MainActivity : AppCompatActivity() {
         }.start()
 
 
-
     }
+
     private fun displayImageList(inputContext: Context, imageUrlList: List<String>) {
         val recyclerView: RecyclerView = findViewById(R.id.rView)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.adapter = MyAdapter(inputContext, imageUrlList)
+        recyclerView.adapter = MyAdapter(imageUrlList) { url ->
+            val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("copied", url)
+            clipboard.setPrimaryClip(clip)
+            Timber.i(url)
+        }
     }
 }
 
@@ -103,7 +108,8 @@ data class Wrapper(
 )
 
 
-class MyAdapter(private val context: Context, val imageUrlList: List<String>) : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+class MyAdapter(private val imageUrlList: List<String>, private val onClick: (String) -> Unit) :
+    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageViewItem: ImageView = view.findViewById(R.id.recyclerViewIV)
@@ -119,12 +125,8 @@ class MyAdapter(private val context: Context, val imageUrlList: List<String>) : 
             .load(imageUrlList[position])
             .centerCrop()
             .into(holder.imageViewItem)
-        holder.imageViewItem.setOnClickListener{
-            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("copied", imageUrlList[position])
-            val thisUrl = imageUrlList[position]
-            clipboard.setPrimaryClip(clip)
-            Timber.i(thisUrl)
+        holder.imageViewItem.setOnClickListener {
+            onClick(imageUrlList[position])
         }
     }
 
