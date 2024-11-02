@@ -29,7 +29,6 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: MyViewModel
     private  lateinit var  adapter: MyAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,51 +50,53 @@ class MainActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.rView)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = adapter
-//        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-//        viewModel.ParsePhotos(adapter)
-
-
-        Thread {
-            var photoLinks: List<String> = listOf("1")
-            try {
-                val response = client.newCall(request).execute()
-
-                val body = response.body()?.string()
-
-                if (body != null) {
-                    val gson = GsonBuilder()
-                        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                        .create()
-
-                    val wrapper = gson.fromJson(body, com.example.android5lab.Wrapper::class.java)
-
-                    photoLinks = wrapper.photos.photo.map { photo ->
-                        "https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_z.jpg"
-                    }
-                    Timber.i("Copied link: $photoLinks")
-
-                    wrapper.photos.photo.forEachIndexed { index, photo ->
-                        if (index % 5 == 0) {
-                            Timber.d("ID: ${photo.id}, Owner: ${photo.owner}, Secret = ${photo.secret}, Server = ${photo.server}, Farm = ${photo.farm}, Title: ${photo.title}, IsPublic = ${photo.isItPublic}, IsFriend = ${photo.isFriend},IsFamily= ${photo.isFamily}")
-                        }
-                    }
-                    runOnUiThread {
-                        displayImageList(this, photoLinks)
-                    }
-                }
-            } catch (e: IOException) {
-                Timber.d("I hate this  program and my life")
+        CoroutineScope(Dispatchers.IO).launch {
+            val list = ParsePhotos("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=ff49fcd4d4a08aa6aafb6ea3de826464&tags=cat&format=json&nojsoncallback=1")
+            withContext(Dispatchers.Main){
+                displayImageList(list)
             }
+        }
 
-        }.start()
+
+
+
 
 
     }
 
 
+    private fun ParsePhotos(inputUrl: String): List<String> {
+        val client = OkHttpClient()
+        var photoLinks: List<String> = listOf("1")
+        val request = Request.Builder()
+            .url(inputUrl)
+            .build()
+        client.newCall(request).execute().body()?.string()
+        val response = client.newCall(request).execute()
+        val body = response.body()?.string()
+        if (body != null) {
+            val gson = GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create()
 
+            val wrapper = gson.fromJson(body, com.example.android5lab.Wrapper::class.java)
 
-    private fun displayImageList(inputContext: Context, imageUrlList: List<String>) {
+            photoLinks = wrapper.photos.photo.map { photo ->
+                "https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_z.jpg"
+            }
+            Timber.i("Copied link: $photoLinks")
+
+            wrapper.photos.photo.forEachIndexed { index, photo ->
+                if (index % 5 == 0) {
+                    Timber.d("ID: ${photo.id}, Owner: ${photo.owner}, Secret = ${photo.secret}, Server = ${photo.server}, Farm = ${photo.farm}, Title: ${photo.title}, IsPublic = ${photo.isItPublic}, IsFriend = ${photo.isFriend},IsFamily= ${photo.isFamily}")
+                }
+            }
+
+        }
+        return photoLinks
+    }
+
+    private fun displayImageList( imageUrlList: List<String>) {
         val recyclerView: RecyclerView = findViewById(R.id.rView)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = MyAdapter(imageUrlList) { url ->
