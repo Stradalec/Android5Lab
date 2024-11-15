@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity() {
             withContext(Dispatchers.Main){
                 MyAdapter = ContactAdapter(contacts)
                 recyclerView.adapter = MyAdapter
-                //displayAll(MyAdapter)
             }
         }
 
@@ -58,7 +57,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun getContacts() : List<Contact>{
-        val wrapper: List<Contact> = emptyList()
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://drive.google.com/u/0/uc?id=1-KO-9GA3NzSgIc1dkAsNm8Dqw0fuPxcR&=download").build()
@@ -68,24 +66,22 @@ class MainActivity : AppCompatActivity() {
             val gson = GsonBuilder().create()
             val wrapper: List<Contact> = gson.fromJson(body, Array<Contact>::class.java).toList()
             Timber.d("Русский язык")
-            val Contactlist: List<Contact> = wrapper
             wrapper.forEach { contact ->
                 Timber.d("Name: ${contact.name}, Phone: ${contact.phone}, Type: ${contact.type}")
             }
-
-        }
-        return withContext(Dispatchers.IO){
-            wrapper
+            return wrapper
+        } else {
+            return emptyList()
         }
     }
 
     private fun filtered(inputContact: List<Contact>, filter: String): List<Contact>{
         Timber.d("Trying filter")
         if (filter.isEmpty()) {
-            inputContact
+            return  inputContact
             Timber.d("Nothing to filter")
         } else {
-            inputContact.filter {
+            return inputContact.filter {
                 it.name.contains(filter, ignoreCase = true) ||
                         it.phone.contains(filter,ignoreCase = true) ||
                         it.type.contains(filter, ignoreCase = true)
@@ -95,11 +91,6 @@ class MainActivity : AppCompatActivity() {
         return inputContact
     }
 
-    private  fun displayAll(inputAdapter: ContactAdapter) {
-        val recyclerView: RecyclerView = findViewById(R.id.rView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = inputAdapter
-    }
 }
 
 
