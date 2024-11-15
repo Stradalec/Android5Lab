@@ -29,7 +29,13 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    private  lateinit var  adapter: MyAdapter
+    private  var  adapter = MyAdapter(emptyList()) { url ->
+        val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("copied", url)
+        clipboard.setPrimaryClip(clip)
+        Timber.i(url)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,9 +53,9 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = adapter
         CoroutineScope(Dispatchers.IO).launch {
-            val list = ParsePhotos("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=ff49fcd4d4a08aa6aafb6ea3de826464&tags=cat&format=json&nojsoncallback=1")
+            val list = parsePhotos("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=ff49fcd4d4a08aa6aafb6ea3de826464&tags=cat&format=json&nojsoncallback=1")
             withContext(Dispatchers.Main){
-                displayImageList(list)
+                adapter.updateList(list)
             }
         }
 
@@ -61,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun ParsePhotos(inputUrl: String): List<String> {
+    private fun parsePhotos(inputUrl: String): List<String> {
         val client = OkHttpClient()
         var photoLinks: List<String> = listOf("1")
         val request = Request.Builder()
@@ -92,16 +98,6 @@ class MainActivity : AppCompatActivity() {
         return photoLinks
     }
 
-    private fun displayImageList( imageUrlList: List<String>) {
-        val recyclerView: RecyclerView = findViewById(R.id.rView)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
-        recyclerView.adapter = MyAdapter(imageUrlList) { url ->
-            val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("copied", url)
-            clipboard.setPrimaryClip(clip)
-            Timber.i(url)
-        }
-    }
 }
 
 

@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class MyAdapter(private val imageUrlList: List<String>, private val onClick: (String) -> Unit) :
+class MyAdapter(private var imageUrlList: List<String>, private val onClick: (String) -> Unit) :
     RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,5 +31,10 @@ class MyAdapter(private val imageUrlList: List<String>, private val onClick: (St
 
     override fun getItemCount(): Int {
         return imageUrlList.size
+    }
+
+    fun updateList(urls: List<String>) {
+        imageUrlList = urls
+        notifyDataSetChanged()
     }
 }
